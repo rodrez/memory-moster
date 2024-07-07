@@ -85,6 +85,7 @@
       playAgainEl.style.display = 'none';
     }
     createBoard(level);
+    playerWon = false;
   }
 
   onMount(() => {
