@@ -7,17 +7,52 @@
   import * as AlertDialog from '$lib/components/ui/alert-dialog';
   import Congrats from '$lib/assets/images/congrats.webp';
   import PlayButton from '$lib/assets/images/play-button.webp';
+  import { levelStore, maxLevel, levelStep } from '$lib/stores/levelStore';
+  import { get } from 'svelte/store';
 
-  export let level = 4; // Default level
+  let level: number;
   let cardsChosen: any[] = [];
-  let cardsChosenId: any[] = [];
+  let cardsChosenId: number[] = [];
   let cardsWon: any[] = [];
   let cardArray: any[] = [];
   let playerWon: boolean = false;
 
-  function getRandomizedCardArray(level: number) {
-    const numberOfPairs = level;
+  const layouts = [
+    {
+      class: 'regular-board',
+      cardCount: 8 // 2x4 grid
+    },
+    {
+      class: 'arrow',
+      cardCount: 10
+    },
+    {
+      class: 'diamond',
+      cardCount: 12
+    },
+    {
+      class: 'deer',
+      cardCount: 14
+    },
+    {
+      class: 'stair',
+      cardCount: 16
+    },
+    {
+      class: 'anchor',
+      cardCount: 18
+    },
+    {
+      class: 'rocket',
+      cardCount: 20
+    }
+  ];
+  let currentLayout = layouts[Math.floor(Math.random() * layouts.length)];
+
+  function getRandomizedCardArray(count: number) {
+    const numberOfPairs = count / 2;
     const selectedImages = allMonsterImages.sort(() => 0.5 - Math.random()).slice(0, numberOfPairs);
+
     const cardArray: any[] = [];
 
     selectedImages.forEach((image) => {
@@ -29,15 +64,14 @@
   }
 
   function createBoard(level: number) {
+    currentLayout = layouts.find((layout) => layout.cardCount === level) || layouts[0];
     cardArray = getRandomizedCardArray(level);
   }
 
   function flipCard(id: number) {
-    console.log(`Card clicked: ${id}`); // Debug log
     playCardFlipSound();
     if (!cardsChosenId.includes(id) && !cardArray[id].flipped && !cardArray[id].matched) {
       cardArray[id].flipped = true;
-      console.log(`Card flipped: ${id}`); // Debug log
       cardsChosen.push(cardArray[id].name);
       cardsChosenId.push(id);
 
@@ -54,7 +88,6 @@
       playCardMatchSound();
       cardArray[optionOneId].matched = true;
       cardArray[optionTwoId].matched = true;
-      cardsWon.push(cardsChosen);
     } else {
       cardArray[optionOneId].flipped = false;
       cardArray[optionTwoId].flipped = false;
@@ -62,7 +95,7 @@
     cardsChosen = [];
     cardsChosenId = [];
 
-    if (cardsWon.length === cardArray.length / 2) {
+    if (cardArray.every((card) => card.matched)) {
       const modelTrigger = document.getElementById('alert-modal');
       playerWon = true;
       modelTrigger?.click();
@@ -80,39 +113,50 @@
     cardsChosen = [];
     cardsChosenId = [];
     cardsWon = [];
+    playerWon = false;
     const playAgainEl = document.querySelector('#play-again-container') as HTMLElement;
     if (playAgainEl) {
       playAgainEl.style.display = 'none';
     }
+
+    levelStore.update((level) => {
+      if (level < maxLevel) {
+        return level + levelStep;
+      } else {
+        return 4; // Reset to the starting level if the max level is reached
+      }
+    });
+
+    level = get(levelStore); // Update the local level variable
     createBoard(level);
-    playerWon = false;
   }
 
   onMount(() => {
+    level = get(levelStore); // Initialize the level from the store
     createBoard(level);
   });
 </script>
 
 <div class="w-full flex flex-col items-center">
-  <div id="game-board">
+  <div id="game-board" class={currentLayout.class}>
     {#each cardArray as card, index}
-      <Card {card} id={index} onClick={flipCard} />
+      <Card {card} id={index} onClick={() => flipCard(index)} />
     {/each}
   </div>
 </div>
 {#if playerWon}
   <div
     style="
- position: fixed;
- top: -50px;
- left: 0;
- z-index: 51;
- height: 100vh;
- width: 100vw;
- display: flex;
- justify-content: center;
- overflow: hidden;
- pointer-events: none;"
+      position: fixed;
+      top: -50px;
+      left: 0;
+      z-index: 51;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      justify-content: center;
+      overflow: hidden;
+      pointer-events: none;"
   >
     <Confetti
       x={[-5, 5]}
@@ -126,11 +170,11 @@
   </div>
 {/if}
 
-<AlertDialog.Root class="bg-slate-900/80">
+<AlertDialog.Root>
   <AlertDialog.Trigger id="alert-modal"></AlertDialog.Trigger>
   <AlertDialog.Content>
     <AlertDialog.Header>
-      <AlertDialog.Title class="text-slate-900">You've Won!</AlertDialog.Title>
+      <AlertDialog.Title class="">You've Won!</AlertDialog.Title>
       <AlertDialog.Description>
         <img src={Congrats} alt="Congratulations" />
       </AlertDialog.Description>
@@ -145,7 +189,3 @@
     </AlertDialog.Footer>
   </AlertDialog.Content>
 </AlertDialog.Root>
-
-<style>
-  /* Add your styles here */
-</style>
