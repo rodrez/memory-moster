@@ -23,38 +23,4 @@
   </div>
 </div>
 
-<style>
-  .card {
-    perspective: 1000px;
-  }
-
-  .card-inner {
-    transition: transform 0.6s;
-    transform-style: preserve-3d;
-    position: relative;
-  }
-
-  .flipped {
-    transform: rotateY(180deg);
-  }
-
-  .card-front,
-  .card-back {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    backface-visibility: hidden;
-  }
-
-  .card-front {
-    transform: rotateY(180deg);
-  }
-
-  .matched {
-    border: 2px solid green; /* Example style for matched cards */
-    box-shadow: 0 0 10px green;
-    opacity: 0.5;
-    pointer-events: none;
-    border-radius: 12px;
-  }
-</style>
+<style></style>

@@ -9,6 +9,7 @@
   import PlayButton from '$lib/assets/images/play-button.webp';
   import { levelStore, maxLevel, levelStep } from '$lib/stores/levelStore';
   import { get } from 'svelte/store';
+  import MonsterCard from './monster-card.svelte';
 
   let level: number;
   let cardsChosen: any[] = [];

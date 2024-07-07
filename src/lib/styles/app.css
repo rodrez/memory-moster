@@ -466,6 +466,10 @@
   opacity: 0.5;
   pointer-events: none;
 }
+  .matched > .card-front > img{
+    opacity: 0.2;
+    pointer-events: none;
+  }
 @media (max-width: 768px) {
   .card {
     max-width: 80px;

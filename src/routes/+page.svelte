@@ -25,7 +25,7 @@
 </script>
 
 <main>
-  <div>
+  <div class="flex justify-center">
     <img
       src={MemoryMonster}
       class="md:w-3/12 -mt-24 md:m-0 aspect-auto mx-auto"
